@@ -46,6 +46,7 @@ var $ = function (selector) {
   function Tokenizer(selector) {
   	this.selector = selector.replace(/\s*([^\w])\s*/g,"$1"); //TODO do some more preparations
   	this.tokens = [];	
+  	this.tokenize();
   }
 
   Tokenizer.prototype.getTokens = function() {
@@ -109,10 +110,10 @@ var $ = function (selector) {
   function getElements(selector) {
   	var tokenElements= [];
   	var tokenizer = new Tokenizer(selector);
-  	tokenizer.tokenize();
   	var tokens = tokenizer.getTokens();
   	
   	var firstToken = tokens[0];
+  	
 	var	tempElements = firstToken.getElements();
 
 	if(tokens.length==1) { //so what the built in matcher returned is everything
