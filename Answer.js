@@ -1,36 +1,40 @@
 var $ = function (selector) {
   var elements = [];
 
-  
-
-  console.log('executed');
-
-  ////////////////////
-  // Your code here //
-  ////////////////////
-
-  function Token(token,prefix) {
+  function Token(token, prefix) {
   	this.token = token;
-  	this.pref = prefix;
+  	this.propertyName = this.determinePropertyName(prefix);
   	this.getElements = this.getGetterByTokenType();
+  }
+
+  Token.prototype.determinePropertyName = function(prefix) {
+  		if (prefix=='.') {
+  			return 'className';
+  		} else if (prefix=='#') {
+  			return 'id';
+  		} else {
+  			return 'tagName';
+  		}
   }
 
   Token.prototype.getToken = function() {
   	return this.token;
   }
 
-  Token.prototype.getPrefix = function() {
-  	return this.pref;
+  Token.prototype.getPropertyName = function() {
+  	return this.propertyName;
   }
 
   Token.prototype.getGetterByTokenType = function() {
-  		if (this.prefix = '.') {
+  		if (this.propertyName === 'className') {
   			return function() {
   				return document.getElementsByClassName(this.token);
   			}
-  		} else if (this.prefix = '#') {
+  		} else if (this.propertyName === 'id') {
   			return function() {
-  				return document.getElementsById(this.token);
+  				var list = [];
+  				list.push(document.getElementById(this.token));
+  				return list;
   			}
   		} else {
   			return function() {
@@ -40,7 +44,7 @@ var $ = function (selector) {
   }
 
   function Tokenizer(selector) {
-  	this.selector = selector; //TODO selector.replace(/\s*([^\w])\s*/g,"$1");
+  	this.selector = selector.replace(/\s*([^\w])\s*/g,"$1");
   	this.tokens = [];	
   }
 
@@ -70,14 +74,52 @@ var $ = function (selector) {
   	}
   };
 
-  var tokenizer = new Tokenizer(selector);
-  tokenizer.tokenize();
-  var tokens = tokenizer.getTokens();
-  
-  console.log('tokens -->');
-  for (var i=0;i<tokens.length;++i) { //TODO foreach
-  	console.log('token: [' + tokens[i].getToken() + '] tokenPrefix: [' + tokens[i].getPrefix() + ']');	
+  function matches(elementToCheck, tokens) {
+
+  		var matches=true;
+	  	for (var i=1;i<tokens.length;++i) {
+	  		var token = tokens[i];
+
+	  		if (token.getPropertyName()==='className') { //dealing with multiple classes
+  				var classArray = elementToCheck.className.split(" ");
+  				for (clazz in classArray) {
+  					if (clazz===token.getToken());
+  				}
+  			} else {
+  				if ((elementToCheck[token.getPropertyName()].toLowerCase() != token.getToken())) {
+			      matches = false;
+			      break;
+			    }
+  			}
+  				
+	  	}
+	  	return matches;
   }
-  
+
+  function getElements(selector) {
+  	var tokenElements= [];
+  	var tokenizer = new Tokenizer(selector);
+  	tokenizer.tokenize();
+  	var tokens = tokenizer.getTokens();
+  	
+  	var firstToken = tokens[0];
+	var	tempElements = firstToken.getElements();
+
+	if(tokens.length==1) { //so What the built in matcher returned is everything
+		return tempElements;
+	}
+
+	for(var j=0;j<tempElements.length;++j) {
+		var elementToCheck = tempElements[j];
+
+		if (matches(elementToCheck, tokens)) {
+			tokenElements.push(elementToCheck);
+		}
+
+ 	}
+ 	return tokenElements;
+  }
+
+  elements = getElements(selector);
   return elements;
 }
