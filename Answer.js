@@ -44,7 +44,7 @@ var $ = function (selector) {
   }
 
   function Tokenizer(selector) {
-  	this.selector = selector.replace(/\s*([^\w])\s*/g,"$1");
+  	this.selector = selector.replace(/\s*([^\w])\s*/g,"$1"); //TODO do some more preparations
   	this.tokens = [];	
   }
 
@@ -74,6 +74,15 @@ var $ = function (selector) {
   	}
   };
 
+  function contains(array, str) {
+  	for (var i = 0; i<array.length;++i) {
+		if (array[i] === str) {
+			return true;
+		}
+  	}
+  	return false;
+  }
+
   function matches(elementToCheck, tokens) {
 
   		var matches=true;
@@ -82,8 +91,9 @@ var $ = function (selector) {
 
 	  		if (token.getPropertyName()==='className') { //dealing with multiple classes
   				var classArray = elementToCheck.className.split(" ");
-  				for (clazz in classArray) {
-  					if (clazz===token.getToken());
+  				if (!contains(classArray, token.getToken())) {
+  					matches = false;
+  					break;
   				}
   			} else {
   				if ((elementToCheck[token.getPropertyName()].toLowerCase() != token.getToken())) {
@@ -105,7 +115,7 @@ var $ = function (selector) {
   	var firstToken = tokens[0];
 	var	tempElements = firstToken.getElements();
 
-	if(tokens.length==1) { //so What the built in matcher returned is everything
+	if(tokens.length==1) { //so what the built in matcher returned is everything
 		return tempElements;
 	}
 
